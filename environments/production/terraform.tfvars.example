@@ -1,0 +1,41 @@
+# =============================================================================
+# TERRAFORM VARIABLES EXAMPLE - PRODUCTION ENVIRONMENT
+# =============================================================================
+# Copy this file to terraform.tfvars and customize the values for your deployment
+
+# Environment Configuration
+environment = "production"
+aws_region  = "us-east-1"
+
+# Project Configuration
+project_name = "farmers-market"
+
+# Networking Configuration
+vpc_cidr                = "10.1.0.0/16"  # Different CIDR for production
+availability_zone_count = 3              # More AZs for HA
+single_nat_gateway      = false          # Multiple NAT gateways for HA
+
+# EKS Configuration
+cluster_name                     = "farmers-market-prod"
+kubernetes_version              = "1.28"
+cluster_endpoint_public_access  = false  # Private endpoint for security
+
+# Node Group Configuration (Production-ready)
+instance_types = ["t3.medium"]
+capacity_type  = "ON_DEMAND"  # On-demand for stability
+min_size       = 2            # Minimum 2 for HA
+max_size       = 5
+desired_size   = 3            # 3 nodes for production
+disk_size      = 50           # Larger disk
+
+# Feature Flags
+enable_ebs_csi    = true
+enable_monitoring = true      # Enabled for production
+
+# Additional Tags
+additional_tags = {
+  Team        = "platform"
+  CostCenter  = "production"
+  Environment = "production"
+  Criticality = "high"
+}

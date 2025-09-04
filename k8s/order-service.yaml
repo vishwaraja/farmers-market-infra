@@ -1,0 +1,99 @@
+# =============================================================================
+# ORDER SERVICE DEPLOYMENT
+# =============================================================================
+# Sample order service deployment for Farmers Market
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: farmers-market
+  labels:
+    app: order-service
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        version: v1
+    spec:
+      containers:
+      - name: order-service
+        image: nginx:alpine  # Replace with your actual order service image
+        ports:
+        - containerPort: 80
+        env:
+        - name: SERVICE_NAME
+          value: "order-service"
+        - name: SERVICE_VERSION
+          value: "v1"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        liveness_probe:
+          http_get:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readiness_probe:
+          http_get:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: farmers-market
+  labels:
+    app: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: farmers-market
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+    http {
+        server {
+            listen 80;
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+            location /api/orders {
+                return 200 '{"message": "Order service is running", "service": "order-service", "version": "v1", "orders": []}';
+                add_header Content-Type application/json;
+            }
+            location / {
+                return 200 '{"message": "Order service", "endpoints": ["/health", "/api/orders"]}';
+                add_header Content-Type application/json;
+            }
+        }
+    }

@@ -1,0 +1,12 @@
+# =============================================================================
+# FARMERS MARKET NAMESPACE
+# =============================================================================
+# Namespace for Farmers Market microservices
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: farmers-market
+  labels:
+    name: farmers-market
+    app: farmers-market

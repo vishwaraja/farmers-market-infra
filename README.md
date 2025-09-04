@@ -30,27 +30,118 @@ This infrastructure provides:
 
 ## 🏗️ Architecture
 
+### **High-Level Overview**
+
+```mermaid
+graph TB
+    subgraph "Internet"
+        Users[👥 Users]
+        Developers[👨‍💻 Developers]
+    end
+    
+    subgraph "AWS Account - Dev Environment"
+        subgraph "VPC (10.0.0.0/16)"
+            subgraph "Public Subnets"
+                ALB[🔄 Application Load Balancer<br/>SSL Termination<br/>Health Checks]
+                CloudFront[🌐 CloudFront CDN<br/>Global Distribution]
+            end
+            
+            subgraph "Private Subnets"
+                subgraph "EKS Cluster"
+                    Kong[🦍 Kong API Gateway<br/>Rate Limiting<br/>CORS<br/>Authentication]
+                    subgraph "Microservices"
+                        UserSvc[👤 User Service<br/>Authentication<br/>User Management]
+                        ProductSvc[📦 Product Service<br/>Product Catalog<br/>Inventory]
+                        OrderSvc[🛒 Order Service<br/>Order Processing<br/>Payments]
+                    end
+                    PostgreSQL[(🐘 PostgreSQL<br/>Kong Configuration)]
+                end
+            end
+            
+            subgraph "Storage"
+                S3[📁 S3 Bucket<br/>Static Frontend Files]
+            end
+        end
+    end
+    
+    Users --> CloudFront
+    Developers --> ALB
+    CloudFront --> S3
+    ALB --> Kong
+    Kong --> UserSvc
+    Kong --> ProductSvc
+    Kong --> OrderSvc
+    Kong --> PostgreSQL
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    AWS Account                              │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │   Dev Environment │    │    Production Environment      │ │
-│  │                 │    │                                 │ │
-│  │ ┌─────────────┐ │    │ ┌─────────────────────────────┐ │ │
-│  │ │     VPC     │ │    │ │           VPC               │ │ │
-│  │ │ 10.0.0.0/16 │ │    │ │      10.1.0.0/16           │ │ │
-│  │ │             │ │    │ │                             │ │ │
-│  │ │ ┌─────────┐ │ │    │ │ ┌─────────────────────────┐ │ │ │
-│  │ │ │  EKS    │ │ │    │ │ │         EKS             │ │ │ │
-│  │ │ │ Cluster │ │ │    │ │ │       Cluster           │ │ │ │
-│  │ │ │ 1 Node  │ │ │    │ │ │      3 Nodes            │ │ │ │
-│  │ │ │ t3.small│ │ │    │ │ │     t3.medium           │ │ │ │
-│  │ │ │  SPOT   │ │ │    │ │ │    ON_DEMAND            │ │ │ │
-│  │ │ └─────────┘ │ │    │ │ └─────────────────────────┘ │ │ │
-│  │ └─────────────┘ │    │ └─────────────────────────────┘ │ │
-│  └─────────────────┘    └─────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+
+### **Detailed Component Architecture**
+
+```mermaid
+graph LR
+    subgraph "Frontend Layer"
+        React[⚛️ React/Next.js App]
+        S3Static[📁 S3 Static Hosting]
+        CDN[🌐 CloudFront CDN]
+    end
+    
+    subgraph "API Gateway Layer"
+        ALB[🔄 AWS ALB]
+        KongProxy[🦍 Kong Proxy]
+        KongAdmin[🦍 Kong Admin API]
+        KongDB[(🐘 PostgreSQL)]
+    end
+    
+    subgraph "Microservices Layer"
+        UserAPI[👤 User API<br/>/api/users]
+        ProductAPI[📦 Product API<br/>/api/products]
+        OrderAPI[🛒 Order API<br/>/api/orders]
+    end
+    
+    subgraph "Infrastructure Layer"
+        EKS[☸️ EKS Cluster<br/>1 Node (t3.small SPOT)]
+        VPC[🏠 VPC<br/>10.0.0.0/16]
+        NAT[🌐 NAT Gateway]
+    end
+    
+    React --> S3Static
+    S3Static --> CDN
+    CDN --> ALB
+    ALB --> KongProxy
+    KongProxy --> UserAPI
+    KongProxy --> ProductAPI
+    KongProxy --> OrderAPI
+    KongAdmin --> KongDB
+    UserAPI --> EKS
+    ProductAPI --> EKS
+    OrderAPI --> EKS
+    EKS --> VPC
+    VPC --> NAT
+```
+
+### **Data Flow Architecture**
+
+```mermaid
+sequenceDiagram
+    participant U as 👥 User
+    participant CF as 🌐 CloudFront
+    participant ALB as 🔄 ALB
+    participant K as 🦍 Kong
+    participant S as 📦 Service
+    participant DB as 🐘 Database
+    
+    U->>CF: Request Frontend
+    CF->>U: Static Files (HTML/CSS/JS)
+    
+    U->>ALB: API Request
+    ALB->>K: Forward to Kong
+    K->>K: Rate Limiting Check
+    K->>K: CORS Headers
+    K->>S: Route to Service
+    S->>DB: Database Query
+    DB->>S: Return Data
+    S->>K: API Response
+    K->>ALB: Forward Response
+    ALB->>U: Final Response
 ```
 
 ## 📁 Project Structure
@@ -130,6 +221,52 @@ aws configure
 
 ## 🚀 Quick Start
 
+### **Deployment Flow**
+
+```mermaid
+flowchart TD
+    A[📥 Clone Repository] --> B[🔧 Bootstrap State Management]
+    B --> C[🏗️ Deploy Infrastructure]
+    C --> D[☸️ Deploy Microservices]
+    D --> E[🦍 Configure Kong]
+    E --> F[✅ Test & Verify]
+    
+    subgraph "Bootstrap Phase"
+        B1[Create S3 Bucket]
+        B2[Create DynamoDB Table]
+        B3[Create KMS Key]
+    end
+    
+    subgraph "Infrastructure Phase"
+        C1[Deploy VPC & Networking]
+        C2[Deploy EKS Cluster]
+        C3[Deploy ALB & Kong]
+        C4[Deploy Frontend (S3 + CloudFront)]
+    end
+    
+    subgraph "Application Phase"
+        D1[Deploy User Service]
+        D2[Deploy Product Service]
+        D3[Deploy Order Service]
+    end
+    
+    B --> B1
+    B1 --> B2
+    B2 --> B3
+    B3 --> C
+    
+    C --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 --> D
+    
+    D --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> E
+```
+
 ### 1. Clone and Setup
 
 ```bash
@@ -161,7 +298,17 @@ cd farmers-market-infra
 ./scripts/deploy.sh production apply
 ```
 
-### 4. Connect to EKS Cluster
+### 4. Deploy Microservices
+
+```bash
+# Deploy sample microservices
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/user-service.yaml
+kubectl apply -f k8s/product-service.yaml
+kubectl apply -f k8s/order-service.yaml
+```
+
+### 5. Connect to EKS Cluster
 
 ```bash
 # Configure kubectl for dev
@@ -222,19 +369,29 @@ terraform destroy
 
 ## 💰 Cost Optimization
 
-### Development Environment
+### **Cost Breakdown Diagram**
+
+```mermaid
+pie title Monthly Infrastructure Costs (~$65/month)
+    "EKS Worker Node (t3.small SPOT)" : 15
+    "Application Load Balancer" : 16
+    "NAT Gateway" : 32
+    "CloudFront + S3" : 2
+```
+
+### **Development Environment**
 - **Spot Instances**: 60-70% cost savings
 - **Single NAT Gateway**: Shared across AZs
 - **Minimal Node Count**: 1 node with auto-scaling
 - **Small Instance Types**: t3.small
 
-### Production Environment
+### **Production Environment**
 - **On-Demand Instances**: Stable pricing and availability
 - **Multiple NAT Gateways**: High availability
 - **Right-sized Resources**: t3.medium for microservices
 - **Auto-scaling**: Scale based on demand
 
-### Cost Monitoring
+### **Cost Monitoring**
 - Enable AWS Cost Explorer
 - Set up billing alerts
 - Use AWS Budgets for cost control

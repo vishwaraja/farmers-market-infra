@@ -34,32 +34,32 @@ This infrastructure provides:
 
 ```mermaid
 graph TB
-    subgraph "Internet"
-        Users[👥 Users]
-        Developers[👨‍💻 Developers]
+    subgraph Internet["Internet"]
+        Users["👥 Users"]
+        Developers["👨‍💻 Developers"]
     end
     
-    subgraph "AWS Account - Dev Environment"
-        subgraph "VPC (10.0.0.0/16)"
-            subgraph "Public Subnets"
-                ALB[🔄 Application Load Balancer<br/>SSL Termination<br/>Health Checks]
-                CloudFront[🌐 CloudFront CDN<br/>Global Distribution]
+    subgraph AWS["AWS Account - Dev Environment"]
+        subgraph VPC["VPC (10.0.0.0/16)"]
+            subgraph Public["Public Subnets"]
+                ALB["🔄 Application Load Balancer<br/>SSL Termination<br/>Health Checks"]
+                CloudFront["🌐 CloudFront CDN<br/>Global Distribution"]
             end
             
-            subgraph "Private Subnets"
-                subgraph "EKS Cluster"
-                    Kong[🦍 Kong API Gateway<br/>Rate Limiting<br/>CORS<br/>Authentication]
-                    subgraph "Microservices"
-                        UserSvc[👤 User Service<br/>Authentication<br/>User Management]
-                        ProductSvc[📦 Product Service<br/>Product Catalog<br/>Inventory]
-                        OrderSvc[🛒 Order Service<br/>Order Processing<br/>Payments]
+            subgraph Private["Private Subnets"]
+                subgraph EKS["EKS Cluster"]
+                    Kong["🦍 Kong API Gateway<br/>Rate Limiting<br/>CORS<br/>Authentication"]
+                    subgraph Microservices["Microservices"]
+                        UserSvc["👤 User Service<br/>Authentication<br/>User Management"]
+                        ProductSvc["📦 Product Service<br/>Product Catalog<br/>Inventory"]
+                        OrderSvc["🛒 Order Service<br/>Order Processing<br/>Payments"]
                     end
-                    PostgreSQL[(🐘 PostgreSQL<br/>Kong Configuration)]
+                    PostgreSQL[("🐘 PostgreSQL<br/>Kong Configuration")]
                 end
             end
             
-            subgraph "Storage"
-                S3[📁 S3 Bucket<br/>Static Frontend Files]
+            subgraph Storage["Storage"]
+                S3["📁 S3 Bucket<br/>Static Frontend Files"]
             end
         end
     end
@@ -78,29 +78,29 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "Frontend Layer"
-        React[⚛️ React/Next.js App]
-        S3Static[📁 S3 Static Hosting]
-        CDN[🌐 CloudFront CDN]
+    subgraph Frontend["Frontend Layer"]
+        React["⚛️ React/Next.js App"]
+        S3Static["📁 S3 Static Hosting"]
+        CDN["🌐 CloudFront CDN"]
     end
     
-    subgraph "API Gateway Layer"
-        ALB[🔄 AWS ALB]
-        KongProxy[🦍 Kong Proxy]
-        KongAdmin[🦍 Kong Admin API]
-        KongDB[(🐘 PostgreSQL)]
+    subgraph Gateway["API Gateway Layer"]
+        ALB["🔄 AWS ALB"]
+        KongProxy["🦍 Kong Proxy"]
+        KongAdmin["🦍 Kong Admin API"]
+        KongDB[("🐘 PostgreSQL")]
     end
     
-    subgraph "Microservices Layer"
-        UserAPI[👤 User API<br/>/api/users]
-        ProductAPI[📦 Product API<br/>/api/products]
-        OrderAPI[🛒 Order API<br/>/api/orders]
+    subgraph Microservices["Microservices Layer"]
+        UserAPI["👤 User API<br/>/api/users"]
+        ProductAPI["📦 Product API<br/>/api/products"]
+        OrderAPI["🛒 Order API<br/>/api/orders"]
     end
     
-    subgraph "Infrastructure Layer"
-        EKS[☸️ EKS Cluster<br/>1 Node (t3.small SPOT)]
-        VPC[🏠 VPC<br/>10.0.0.0/16]
-        NAT[🌐 NAT Gateway]
+    subgraph Infrastructure["Infrastructure Layer"]
+        EKS["☸️ EKS Cluster<br/>1 Node (t3.small SPOT)"]
+        VPC["🏠 VPC<br/>10.0.0.0/16"]
+        NAT["🌐 NAT Gateway"]
     end
     
     React --> S3Static
@@ -122,12 +122,12 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant U as 👥 User
-    participant CF as 🌐 CloudFront
-    participant ALB as 🔄 ALB
-    participant K as 🦍 Kong
-    participant S as 📦 Service
-    participant DB as 🐘 Database
+    participant U as "👥 User"
+    participant CF as "🌐 CloudFront"
+    participant ALB as "🔄 ALB"
+    participant K as "🦍 Kong"
+    participant S as "📦 Service"
+    participant DB as "🐘 Database"
     
     U->>CF: Request Frontend
     CF->>U: Static Files (HTML/CSS/JS)
@@ -225,29 +225,29 @@ aws configure
 
 ```mermaid
 flowchart TD
-    A[📥 Clone Repository] --> B[🔧 Bootstrap State Management]
-    B --> C[🏗️ Deploy Infrastructure]
-    C --> D[☸️ Deploy Microservices]
-    D --> E[🦍 Configure Kong]
-    E --> F[✅ Test & Verify]
+    A["📥 Clone Repository"] --> B["🔧 Bootstrap State Management"]
+    B --> C["🏗️ Deploy Infrastructure"]
+    C --> D["☸️ Deploy Microservices"]
+    D --> E["🦍 Configure Kong"]
+    E --> F["✅ Test & Verify"]
     
-    subgraph "Bootstrap Phase"
-        B1[Create S3 Bucket]
-        B2[Create DynamoDB Table]
-        B3[Create KMS Key]
+    subgraph Bootstrap["Bootstrap Phase"]
+        B1["Create S3 Bucket"]
+        B2["Create DynamoDB Table"]
+        B3["Create KMS Key"]
     end
     
-    subgraph "Infrastructure Phase"
-        C1[Deploy VPC & Networking]
-        C2[Deploy EKS Cluster]
-        C3[Deploy ALB & Kong]
-        C4[Deploy Frontend (S3 + CloudFront)]
+    subgraph Infrastructure["Infrastructure Phase"]
+        C1["Deploy VPC & Networking"]
+        C2["Deploy EKS Cluster"]
+        C3["Deploy ALB & Kong"]
+        C4["Deploy Frontend (S3 + CloudFront)"]
     end
     
-    subgraph "Application Phase"
-        D1[Deploy User Service]
-        D2[Deploy Product Service]
-        D3[Deploy Order Service]
+    subgraph Application["Application Phase"]
+        D1["Deploy User Service"]
+        D2["Deploy Product Service"]
+        D3["Deploy Order Service"]
     end
     
     B --> B1
@@ -372,7 +372,7 @@ terraform destroy
 ### **Cost Breakdown Diagram**
 
 ```mermaid
-pie title Monthly Infrastructure Costs (~$65/month)
+pie title "Monthly Infrastructure Costs (~$65/month)"
     "EKS Worker Node (t3.small SPOT)" : 15
     "Application Load Balancer" : 16
     "NAT Gateway" : 32

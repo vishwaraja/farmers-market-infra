@@ -82,6 +82,7 @@ kong_services = [
 
 # IAM Configuration
 enable_cross_account_access = true
+enable_mfa_enforcement     = false  # Disabled for now
 cross_account_external_id   = "farmers-market-cross-account-2024"
 
 # IAM User Assignments (add your team members here)

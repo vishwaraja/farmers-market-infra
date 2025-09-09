@@ -116,6 +116,9 @@ module "iam" {
   account_id                  = data.aws_caller_identity.current.account_id
   cross_account_external_id   = var.cross_account_external_id
   
+  # MFA configuration
+  enable_mfa_enforcement = var.enable_mfa_enforcement
+  
   # EKS OIDC configuration
   eks_oidc_provider_arn = module.compute.eks_oidc_provider_arn
   kong_namespace        = "kong"

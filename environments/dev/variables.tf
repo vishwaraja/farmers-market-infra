@@ -234,6 +234,12 @@ variable "enable_cross_account_access" {
   default     = true
 }
 
+variable "enable_mfa_enforcement" {
+  description = "Enable MFA enforcement for all IAM users"
+  type        = bool
+  default     = false
+}
+
 variable "cross_account_external_id" {
   description = "External ID for cross-account role assumption"
   type        = string

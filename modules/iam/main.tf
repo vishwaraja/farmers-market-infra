@@ -267,8 +267,9 @@ resource "aws_iam_policy" "cross_account_policy" {
   })
 }
 
-# MFA Policy - requires MFA for all actions
+# MFA Policy - requires MFA for all actions (only created if MFA is enabled)
 resource "aws_iam_policy" "mfa_policy" {
+  count       = var.enable_mfa_enforcement ? 1 : 0
   name        = "mfa-policy"
   description = "Requires MFA for all actions"
   policy = jsonencode({
@@ -383,33 +384,39 @@ resource "aws_iam_group_policy_attachment" "readonly_cloudwatch_attachment" {
   policy_arn = aws_iam_policy.cloudwatch_policy.arn
 }
 
-# Attach MFA policy to all groups
+# Attach MFA policy to all groups (only if MFA is enabled)
 resource "aws_iam_group_policy_attachment" "devops_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.devops.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }
 
 resource "aws_iam_group_policy_attachment" "admin_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.admin.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }
 
 resource "aws_iam_group_policy_attachment" "developers_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.developers.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }
 
 resource "aws_iam_group_policy_attachment" "qa_engineers_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.qa_engineers.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }
 
 resource "aws_iam_group_policy_attachment" "managers_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.managers.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }
 
 resource "aws_iam_group_policy_attachment" "readonly_mfa_attachment" {
+  count      = var.enable_mfa_enforcement ? 1 : 0
   group      = aws_iam_group.readonly.name
-  policy_arn = aws_iam_policy.mfa_policy.arn
+  policy_arn = aws_iam_policy.mfa_policy[0].arn
 }

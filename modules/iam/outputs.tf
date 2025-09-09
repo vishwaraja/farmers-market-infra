@@ -77,7 +77,7 @@ output "cross_account_policy_arn" {
 
 output "mfa_policy_arn" {
   description = "ARN of the MFA IAM policy"
-  value       = aws_iam_policy.mfa_policy.arn
+  value       = var.enable_mfa_enforcement ? aws_iam_policy.mfa_policy[0].arn : null
 }
 
 # IAM Group Names
@@ -136,7 +136,7 @@ output "iam_policies_summary" {
     s3_access_policy     = aws_iam_policy.s3_access_policy.name
     cloudwatch_policy    = aws_iam_policy.cloudwatch_policy.name
     cross_account_policy = aws_iam_policy.cross_account_policy.name
-    mfa_policy          = aws_iam_policy.mfa_policy.name
+    mfa_policy          = var.enable_mfa_enforcement ? aws_iam_policy.mfa_policy[0].name : null
   }
 }
 

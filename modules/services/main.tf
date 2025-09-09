@@ -418,7 +418,7 @@ resource "kubernetes_service" "kong_proxy" {
 
     port {
       name        = "proxy"
-      port        = 8000
+      port        = 80
       target_port = 8000
     }
 
@@ -428,7 +428,7 @@ resource "kubernetes_service" "kong_proxy" {
       target_port = 8001
     }
 
-    type = "ClusterIP"
+    type = "LoadBalancer"
   }
 }
 

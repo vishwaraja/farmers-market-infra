@@ -86,20 +86,15 @@ output "storage_deployment_instructions" {
   value       = module.storage.deployment_instructions
 }
 
-# API Gateway Information
+# API Gateway Information (Kong LoadBalancer)
 output "api_gateway_url" {
-  description = "URL of the API Gateway"
-  value       = module.api_gateway.api_gateway_url
+  description = "URL of the API Gateway (Kong LoadBalancer)"
+  value       = module.services.kong_proxy_url
 }
 
-output "api_gateway_dns_name" {
-  description = "DNS name of the API Gateway"
-  value       = module.api_gateway.alb_dns_name
-}
-
-output "target_group_arn" {
-  description = "ARN of the target group for API services"
-  value       = module.api_gateway.target_group_arn
+output "api_gateway_internal_url" {
+  description = "Internal URL of the API Gateway"
+  value       = module.services.kong_proxy_internal_url
 }
 
 # Services Information (Kong)
@@ -149,7 +144,7 @@ output "application_urls" {
   description = "Complete application URLs"
   value = {
     storage = module.storage.frontend_url
-    api_gateway = module.api_gateway.api_gateway_url
+    api_gateway = module.services.kong_proxy_url
     services_admin = module.services.kong_admin_url
     cluster  = "https://${module.compute.cluster_endpoint}"
   }

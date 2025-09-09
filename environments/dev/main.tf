@@ -69,25 +69,7 @@ module "storage" {
   # ssl_certificate_arn = var.frontend_ssl_certificate_arn
 }
 
-# API Gateway Module (Load Balancer + API Gateway)
-module "api_gateway" {
-  source = "../../modules/api-gateway"
-  
-  name_prefix           = local.name_prefix
-  vpc_id               = module.networking.vpc_id
-  public_subnet_ids    = module.networking.public_subnet_ids
-  private_subnet_ids   = module.networking.private_subnet_ids
-  enable_alb_logs      = var.enable_alb_logs
-  log_retention_days   = var.log_retention_days
-  tags                 = local.common_tags
-  
-  # Optional: Custom domain configuration
-  # domain_name = var.backend_domain
-  # hosted_zone_id = var.hosted_zone_id
-  # ssl_certificate_arn = var.backend_ssl_certificate_arn
-  
-  depends_on = [module.networking]
-}
+# Note: ALB module removed - Kong now handles load balancing directly via LoadBalancer service type
 
 # Services Module (Kong API Gateway)
 module "services" {

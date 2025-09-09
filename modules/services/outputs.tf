@@ -43,6 +43,11 @@ output "kong_admin_url" {
 }
 
 output "kong_proxy_url" {
+  description = "Kong Proxy URL (external LoadBalancer)"
+  value       = "http://${kubernetes_service.kong_proxy.status[0].load_balancer[0].ingress[0].hostname}"
+}
+
+output "kong_proxy_internal_url" {
   description = "Kong Proxy URL (internal)"
   value       = "http://${kubernetes_service.kong_proxy.metadata[0].name}.${kubernetes_namespace.kong.metadata[0].name}.svc.cluster.local:${kubernetes_service.kong_proxy.spec[0].port[0].port}"
 }

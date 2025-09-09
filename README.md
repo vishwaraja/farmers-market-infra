@@ -42,13 +42,12 @@ graph TB
     subgraph AWS["AWS Account - Dev Environment"]
         subgraph VPC["VPC (10.0.0.0/16)"]
             subgraph Public["Public Subnets"]
-                ALB["🔄 Application Load Balancer<br/>SSL Termination<br/>Health Checks"]
                 CloudFront["🌐 CloudFront CDN<br/>Global Distribution"]
             end
             
             subgraph Private["Private Subnets"]
                 subgraph EKS["EKS Cluster"]
-                    Kong["🦍 Kong API Gateway<br/>Rate Limiting<br/>CORS<br/>Authentication"]
+                    Kong["🦍 Kong API Gateway (LoadBalancer)<br/>Rate Limiting<br/>CORS<br/>Authentication"]
                     subgraph Microservices["Microservices"]
                         UserSvc["👤 User Service<br/>Authentication<br/>User Management"]
                         ProductSvc["📦 Product Service<br/>Product Catalog<br/>Inventory"]
@@ -65,9 +64,8 @@ graph TB
     end
     
     Users --> CloudFront
-    Developers --> ALB
+    Developers --> Kong
     CloudFront --> S3
-    ALB --> Kong
     Kong --> UserSvc
     Kong --> ProductSvc
     Kong --> OrderSvc
@@ -164,7 +162,7 @@ farmers-market-infra/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── versions.tf
-│   ├── api-gateway/                  # ALB + API Gateway
+│   ├── api-gateway/                  # ALB (deprecated - Kong now handles load balancing)
 │   │   ├── main.tf
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
@@ -175,7 +173,7 @@ farmers-market-infra/
 │   │   ├── outputs.tf
 │   │   ├── service-roles.tf
 │   │   └── versions.tf
-│   └── services/                     # Kong API Gateway
+│   └── services/                     # Kong API Gateway (LoadBalancer)
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf

@@ -4,18 +4,18 @@ A well-structured, production-ready AWS infrastructure for The Farmers Market pr
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Environments](#environments)
-- [Deployment](#deployment)
+- [Overview](#-overview)
+- [Architecture](#️-architecture)
+- [Project Structure](#-project-structure)
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Environments](#-environments)
+- [Deployment](#-deployment)
 - [Cost Optimization](#-cost-optimization)
-- [Security](#security)
-- [Monitoring](#monitoring)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
+- [Security](#-security)
+- [Monitoring](#-monitoring)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
 
 ## 🎯 Overview
 

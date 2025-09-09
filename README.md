@@ -12,6 +12,7 @@ A well-structured, production-ready AWS infrastructure for The Farmers Market pr
 - [Environments](#-environments)
 - [Deployment](#-deployment)
 - [Cost Optimization](#-cost-optimization)
+- [Infracost Setup](#-infracost-setup)
 - [Security](#-security)
 - [Monitoring](#-monitoring)
 - [Troubleshooting](#-troubleshooting)
@@ -411,6 +412,35 @@ pie title "Monthly Infrastructure Costs (~$65/month)"
 - Enable AWS Cost Explorer
 - Set up billing alerts
 - Use AWS Budgets for cost control
+
+## 💰 Infracost Setup
+
+Infracost provides real-time cost estimates for your Terraform infrastructure changes directly in pull requests.
+
+### **Quick Setup:**
+1. **Get API Key**: Sign up at [Infracost Cloud](https://infracost.io/cloud) (free)
+2. **Add Secret**: Add `INFRACOST_API_KEY` to GitHub repository secrets
+3. **Create PR**: Infracost will automatically comment with cost estimates
+
+### **What You'll See:**
+- **Cost breakdown** by resource
+- **Cost changes** between commits
+- **Optimization suggestions** (Spot instances, right-sizing)
+- **Budget alerts** for large changes
+
+### **Example PR Comment:**
+```markdown
+## 💰 Infrastructure cost estimate
+
+| Project | Previous | New | Diff |
+|---------|----------|-----|------|
+| **Total** | $0.00/month | $48.23/month | +$48.23/month |
+
+### 💡 Cost optimization suggestions
+- **Consider using Spot instances** for EKS nodes to save ~60% on compute costs
+```
+
+**See [Infracost Setup Guide](docs/INFRACOST_SETUP.md) for detailed instructions.**
 
 ## 🔒 Security
 

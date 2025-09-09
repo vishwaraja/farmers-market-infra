@@ -122,6 +122,21 @@ jobs:
         name: terraform-plan-dev
         path: environments/dev/tfplan
         retention-days: 1
+        
+    - name: 💰 Infracost Setup
+      uses: infracost/infracost-gh-action@v0.10
+      with:
+        api_key: ${{ secrets.INFRACOST_API_KEY }}
+        
+    - name: 💰 Generate Infracost Report
+      run: |
+        infracost breakdown --path=environments/dev \
+          --format=json --out-file=infracost-dev.json
+        infracost comment github --path=infracost-dev.json \
+          --github-token=${{ github.token }} \
+          --repo=${{ github.repository }} \
+          --pull-request=${{ github.event.pull_request.number }} \
+          --behavior=update
 
   # =============================================================================
   # APPLY JOB (Auto-deploy to dev)

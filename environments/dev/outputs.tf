@@ -70,20 +70,25 @@ output "cluster_info" {
   }
 }
 
-# Storage Information
-output "storage_url" {
-  description = "URL to access the static storage (frontend)"
-  value       = module.storage.frontend_url
+# Frontend Information
+output "frontend_url" {
+  description = "URL to access the frontend application"
+  value       = module.frontend.frontend_url
 }
 
-output "storage_s3_bucket" {
-  description = "S3 bucket for static storage deployment"
-  value       = module.storage.s3_bucket_id
+output "frontend_s3_bucket" {
+  description = "S3 bucket for frontend deployment"
+  value       = module.frontend.s3_bucket_name
 }
 
-output "storage_deployment_instructions" {
-  description = "Instructions for deploying static content"
-  value       = module.storage.deployment_instructions
+output "frontend_cloudfront_id" {
+  description = "CloudFront distribution ID"
+  value       = module.frontend.cloudfront_distribution_id
+}
+
+output "frontend_deploy_role" {
+  description = "IAM role for frontend deployment"
+  value       = module.frontend.deploy_role_arn
 }
 
 # API Gateway Information (Kong LoadBalancer)
@@ -143,7 +148,7 @@ output "service_roles" {
 output "application_urls" {
   description = "Complete application URLs"
   value = {
-    storage = module.storage.frontend_url
+    frontend = module.frontend.frontend_url
     api_gateway = module.services.kong_proxy_url
     services_admin = module.services.kong_admin_url
     cluster  = "https://${module.compute.cluster_endpoint}"

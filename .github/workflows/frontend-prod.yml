@@ -1,0 +1,227 @@
+name: 🎨 Frontend Production Environment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wholesale-ecommerce-website/**'
+      - '.github/workflows/frontend-prod.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+
+env:
+  NODE_VERSION: ${{ vars.NODE_VERSION || '18' }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  ENVIRONMENT: ${{ vars.ENVIRONMENT || 'production' }}
+
+jobs:
+  # =============================================================================
+  # VALIDATION JOB
+  # =============================================================================
+  validate:
+    name: 🟢 [VALIDATE] Frontend Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: wholesale-ecommerce-website/web/package-lock.json
+
+      - name: 📦 Install Dependencies
+        working-directory: wholesale-ecommerce-website/web
+        run: npm ci
+
+      - name: 🔍 Lint Code
+        working-directory: wholesale-ecommerce-website/web
+        run: npm run lint
+
+      - name: 🏗️ Build Test
+        working-directory: wholesale-ecommerce-website/web
+        run: npm run build
+
+      - name: 🧪 Test Build Output
+        run: |
+          if [ ! -d "wholesale-ecommerce-website/web/out" ]; then
+            echo "❌ Build output directory 'out' not found!"
+            exit 1
+          fi
+          
+          if [ ! -f "wholesale-ecommerce-website/web/out/index.html" ]; then
+            echo "❌ index.html not found in build output!"
+            exit 1
+          fi
+          
+          echo "✅ Build output validation passed!"
+
+  # =============================================================================
+  # COST ESTIMATION JOB
+  # =============================================================================
+  cost-estimation:
+    name: 💰 [COST] Frontend Cost Estimation
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 💰 Infracost Setup
+        uses: infracost/infracost-gh-action@v0.10
+        with:
+          api_key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: 💰 Generate Infracost Report
+        run: |
+          infracost breakdown --path=infrastructure_as_code/environments/production \
+            --format=json --out-file=infracost-prod.json
+          infracost comment github --path=infracost-prod.json \
+            --github-token=${{ github.token }} \
+            --repo=${{ github.repository }} \
+            --pull-request=${{ github.event.pull_request.number }} \
+            --behavior=update
+
+  # =============================================================================
+  # MANUAL APPROVAL JOB
+  # =============================================================================
+  approval:
+    name: ⏳ [APPROVAL] Manual Production Approval
+    runs-on: ubuntu-latest
+    needs: [validate, cost-estimation]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+      - name: ⏳ Waiting for Manual Approval
+        run: |
+          echo "⏳ Waiting for manual approval to deploy to production..."
+          echo "✅ All validation checks passed!"
+          echo "💰 Cost estimation completed!"
+          echo "🚀 Ready for production deployment!"
+
+  # =============================================================================
+  # DEPLOYMENT JOB
+  # =============================================================================
+  deploy:
+    name: 🚀 [DEPLOY] Frontend to Production
+    runs-on: ubuntu-latest
+    needs: [validate, approval]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: wholesale-ecommerce-website/web/package-lock.json
+
+      - name: 📦 Install Dependencies
+        working-directory: wholesale-ecommerce-website/web
+        run: npm ci
+
+      - name: 🏗️ Build Frontend
+        working-directory: wholesale-ecommerce-website/web
+        run: npm run build
+
+      - name: 🔑 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: ${{ github.workflow }}-${{ github.run_id }}
+
+      - name: 📋 Get S3 Bucket Name
+        id: get-bucket
+        run: |
+          cd infrastructure_as_code/environments/production
+          BUCKET_NAME=$(terraform output -raw frontend_s3_bucket 2>/dev/null || echo "")
+          if [ -z "$BUCKET_NAME" ]; then
+            echo "❌ Could not get S3 bucket name from Terraform output"
+            exit 1
+          fi
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "📦 S3 Bucket: $BUCKET_NAME"
+
+      - name: 📤 Upload to S3
+        run: |
+          aws s3 sync wholesale-ecommerce-website/web/out/ s3://${{ steps.get-bucket.outputs.bucket_name }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --exclude "*.html" \
+            --exclude "*.json"
+          
+          # Upload HTML files with shorter cache
+          aws s3 sync wholesale-ecommerce-website/web/out/ s3://${{ steps.get-bucket.outputs.bucket_name }}/ \
+            --delete \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --include "*.html" \
+            --include "*.json"
+
+      - name: 📋 Get CloudFront Distribution ID
+        id: get-distribution
+        run: |
+          cd infrastructure_as_code/environments/production
+          DISTRIBUTION_ID=$(terraform output -raw frontend_cloudfront_id 2>/dev/null || echo "")
+          if [ -z "$DISTRIBUTION_ID" ]; then
+            echo "❌ Could not get CloudFront distribution ID from Terraform output"
+            exit 1
+          fi
+          echo "distribution_id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+          echo "🌐 CloudFront Distribution: $DISTRIBUTION_ID"
+
+      - name: 🔄 Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.get-distribution.outputs.distribution_id }} \
+            --paths "/*"
+
+      - name: 📋 Get Frontend URL
+        id: get-url
+        run: |
+          cd infrastructure_as_code/environments/production
+          FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
+          echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
+          echo "🌐 Frontend URL: $FRONTEND_URL"
+
+      - name: ✅ Deployment Success
+        run: |
+          echo "🎉 Frontend deployed successfully to production!"
+          echo "🌐 URL: ${{ steps.get-url.outputs.frontend_url }}"
+          echo "📦 S3 Bucket: ${{ steps.get-bucket.outputs.bucket_name }}"
+          echo "🔄 CloudFront Distribution: ${{ steps.get-distribution.outputs.distribution_id }}"
+
+      - name: 📢 Slack Notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            🎨 Frontend Production Deployment - ${{ job.status == 'success' && '✅ Success' || '❌ Failed' }}
+            Environment: ${{ env.ENVIRONMENT }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            URL: ${{ steps.get-url.outputs.frontend_url }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

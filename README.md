@@ -18,6 +18,7 @@ This infrastructure provides:
 
 - **EKS Cluster**: Managed Kubernetes cluster for microservices
 - **Kong API Gateway**: Load balancer and API management
+- **Frontend Hosting**: S3 + CloudFront for static website hosting
 - **VPC**: Isolated network with public/private subnets
 - **State Management**: Isolated Terraform state per environment
 - **CI/CD**: Automated deployment with GitHub Actions
@@ -42,8 +43,8 @@ graph TB
             end
         end
         
-        S3[S3 Bucket<br/>Static Files]
-        CF[CloudFront<br/>CDN]
+        S3[S3 Bucket<br/>Frontend Static Files]
+        CF[CloudFront<br/>Frontend CDN]
     end
     
     U --> CF
@@ -78,6 +79,8 @@ terraform apply
 | **Dev** | $15.20 | $16.05 | $32.40 | $1.20 | $0.38 | **$53.23** |
 | **Production** | $30.40 | $16.05 | $32.40 | $1.20 | $0.38 | **$80.43** |
 
+> **Note**: Frontend hosting (S3 + CloudFront) is included in the CloudFront and S3 costs above. No additional infrastructure needed for static website hosting.
+
 ### Cost Optimization Applied
 - ✅ **SPOT instances** (60-70% savings on compute)
 - ✅ **Single NAT Gateway** (shared across AZs)
@@ -105,12 +108,14 @@ terraform apply
 ### Automated Deployment
 - **Dev**: Auto-deploy on push to `dev` branch
 - **Production**: Manual approval required on push to `main` branch
+- **Frontend**: Separate workflows for frontend deployment
 
 ### CI/CD Features
 - ✅ **Terraform validation** and formatting
 - ✅ **TFLint** and **Checkov** security scanning
 - ✅ **Infracost** cost estimation in PRs
 - ✅ **Infrastructure testing** after deployment
+- ✅ **Frontend build and deployment** (Next.js → S3 + CloudFront)
 
 ## 📁 Project Structure
 
@@ -124,8 +129,10 @@ farmers-market-infra/
 │   ├── networking/    # VPC and subnets
 │   ├── security/      # IAM and security groups
 │   ├── services/      # Kong API Gateway
-│   └── storage/       # S3 and CloudFront
+│   └── frontend/      # S3 and CloudFront for frontend
 ├── .github/workflows/ # CI/CD pipelines
+├── wholesale-ecommerce-website/ # Frontend project
+│   └── web/           # Next.js application
 └── docs/             # Documentation
 ```
 
@@ -139,6 +146,7 @@ farmers-market-infra/
 ### Getting Help
 - Check [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
 - Review [Architecture Documentation](docs/ARCHITECTURE.md)
+- See [Frontend Integration Guide](docs/FRONTEND_INTEGRATION.md)
 - Open an issue for support
 
 ## 📄 License

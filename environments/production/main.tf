@@ -56,17 +56,18 @@ module "compute" {
   depends_on = [module.networking]
 }
 
-# Storage Module (Static Hosting)
-module "storage" {
-  source = "../../modules/storage"
+# Frontend Module (S3 + CloudFront)
+module "frontend" {
+  source = "../../modules/frontend"
   
-  name_prefix = local.name_prefix
-  price_class = var.frontend_price_class
-  tags        = local.common_tags
+  project_name = var.project_name
+  environment  = var.environment
   
   # Optional: Custom domain configuration
   # custom_domain = var.frontend_domain
   # ssl_certificate_arn = var.frontend_ssl_certificate_arn
+  
+  tags = local.common_tags
 }
 
 # Note: ALB module removed - Kong now handles load balancing directly via LoadBalancer service type

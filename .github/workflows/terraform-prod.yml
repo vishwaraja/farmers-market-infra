@@ -4,7 +4,7 @@
 # This workflow deploys changes to production with manual approval
 # Triggers: Push to main branch
 
-name: 🚀 Terraform Production Environment
+name: 🟢 [PRODUCTION] Terraform Production Environment
 
 on:
   push:

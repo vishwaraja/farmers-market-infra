@@ -30,7 +30,7 @@ jobs:
   # VALIDATION JOB
   # =============================================================================
   validate:
-    name: ✅ Terraform Validation & Security
+    name: 🟢 [VALIDATE] Terraform Validation & Security
     runs-on: ubuntu-latest
     
     steps:
@@ -86,7 +86,7 @@ jobs:
   # PLAN JOB
   # =============================================================================
   plan:
-    name: 📋 Terraform Plan
+    name: 🟢 [PLAN] Terraform Plan
     runs-on: ubuntu-latest
     needs: validate
     
@@ -125,7 +125,7 @@ jobs:
   # APPLY JOB (Auto-deploy to dev)
   # =============================================================================
   apply:
-    name: 🚀 Terraform Apply
+    name: 🟢 [APPLY] Terraform Apply
     runs-on: ubuntu-latest
     needs: [validate, plan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
@@ -241,7 +241,7 @@ jobs:
   # PR COMMENT JOB
   # =============================================================================
   pr-comment:
-    name: 💬 Comment PR
+    name: 🟢 [COMMENT] Comment PR
     runs-on: ubuntu-latest
     needs: [validate, plan]
     if: github.event_name == 'pull_request'

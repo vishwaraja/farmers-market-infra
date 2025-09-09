@@ -11,7 +11,7 @@ A well-structured, production-ready AWS infrastructure for The Farmers Market pr
 - [Quick Start](#quick-start)
 - [Environments](#environments)
 - [Deployment](#deployment)
-- [Cost Optimization](#cost-optimization)
+- [Cost Optimization](#-cost-optimization)
 - [Security](#security)
 - [Monitoring](#monitoring)
 - [Troubleshooting](#troubleshooting)

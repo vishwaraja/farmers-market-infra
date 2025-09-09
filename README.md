@@ -154,11 +154,34 @@ farmers-market-infra/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── versions.tf
-│   └── compute/                      # EKS cluster and node groups
+│   ├── compute/                      # EKS cluster and node groups
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── versions.tf
+│   ├── storage/                      # S3 static hosting + CloudFront
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── versions.tf
+│   ├── api-gateway/                  # ALB + API Gateway
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── versions.tf
+│   ├── security/                     # IAM, security groups, access control
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   ├── service-roles.tf
+│   │   └── versions.tf
+│   └── services/                     # Kong API Gateway
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf
-│       └── versions.tf
+│       ├── versions.tf
+│       └── templates/
+│           └── kong.yml.tpl
 ├── environments/                     # Environment-specific configurations
 │   ├── dev/                         # Development environment
 │   │   ├── main.tf

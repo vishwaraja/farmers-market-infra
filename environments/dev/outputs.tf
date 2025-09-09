@@ -70,77 +70,77 @@ output "cluster_info" {
   }
 }
 
-# Frontend Information
-output "frontend_url" {
-  description = "URL to access the frontend application"
-  value       = module.frontend.frontend_url
+# Storage Information
+output "storage_url" {
+  description = "URL to access the static storage (frontend)"
+  value       = module.storage.frontend_url
 }
 
-output "frontend_s3_bucket" {
-  description = "S3 bucket for frontend deployment"
-  value       = module.frontend.s3_bucket_id
+output "storage_s3_bucket" {
+  description = "S3 bucket for static storage deployment"
+  value       = module.storage.s3_bucket_id
 }
 
-output "frontend_deployment_instructions" {
-  description = "Instructions for deploying the frontend"
-  value       = module.frontend.deployment_instructions
+output "storage_deployment_instructions" {
+  description = "Instructions for deploying static content"
+  value       = module.storage.deployment_instructions
 }
 
-# Backend Information
+# API Gateway Information
 output "api_gateway_url" {
   description = "URL of the API Gateway"
-  value       = module.backend.api_gateway_url
+  value       = module.api_gateway.api_gateway_url
 }
 
 output "api_gateway_dns_name" {
   description = "DNS name of the API Gateway"
-  value       = module.backend.alb_dns_name
+  value       = module.api_gateway.alb_dns_name
 }
 
 output "target_group_arn" {
-  description = "ARN of the target group for backend services"
-  value       = module.backend.target_group_arn
+  description = "ARN of the target group for API services"
+  value       = module.api_gateway.target_group_arn
 }
 
-# Kong Information
-output "kong_admin_url" {
+# Services Information (Kong)
+output "services_admin_url" {
   description = "Kong Admin API URL (internal)"
-  value       = module.kong.kong_admin_url
+  value       = module.services.kong_admin_url
 }
 
-output "kong_proxy_url" {
+output "services_proxy_url" {
   description = "Kong Proxy URL (internal)"
-  value       = module.kong.kong_proxy_url
+  value       = module.services.kong_proxy_url
 }
 
-output "kong_deployment_info" {
-  description = "Kong deployment information"
-  value       = module.kong.kong_deployment_info
+output "services_deployment_info" {
+  description = "Services deployment information"
+  value       = module.services.kong_deployment_info
 }
 
-output "kong_connection_commands" {
-  description = "Commands to connect to Kong services"
-  value       = module.kong.kong_connection_commands
+output "services_connection_commands" {
+  description = "Commands to connect to services"
+  value       = module.services.kong_connection_commands
 }
 
-# IAM Information
-output "iam_groups" {
+# Security Information (IAM)
+output "security_groups" {
   description = "IAM groups created"
-  value       = module.iam.iam_groups_summary
+  value       = module.security.iam_groups_summary
 }
 
-output "iam_policies" {
+output "security_policies" {
   description = "IAM policies created"
-  value       = module.iam.iam_policies_summary
+  value       = module.security.iam_policies_summary
 }
 
 output "service_roles" {
   description = "Service roles for AWS services"
   value = {
-    eks_cluster_role = module.iam.eks_cluster_role_name
-    eks_node_role    = module.iam.eks_node_role_name
-    alb_controller_role = module.iam.alb_controller_role_name
-    cross_account_role = module.iam.cross_account_role_name
+    eks_cluster_role = module.security.eks_cluster_role_name
+    eks_node_role    = module.security.eks_node_role_name
+    alb_controller_role = module.security.alb_controller_role_name
+    cross_account_role = module.security.cross_account_role_name
   }
 }
 
@@ -148,9 +148,9 @@ output "service_roles" {
 output "application_urls" {
   description = "Complete application URLs"
   value = {
-    frontend = module.frontend.frontend_url
-    backend  = module.backend.api_gateway_url
-    kong_admin = module.kong.kong_admin_url
+    storage = module.storage.frontend_url
+    api_gateway = module.api_gateway.api_gateway_url
+    services_admin = module.services.kong_admin_url
     cluster  = "https://${module.compute.cluster_endpoint}"
   }
 }

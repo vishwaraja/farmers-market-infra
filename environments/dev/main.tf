@@ -56,9 +56,9 @@ module "compute" {
   depends_on = [module.networking]
 }
 
-# Frontend Module (Static Hosting)
-module "frontend" {
-  source = "../../modules/frontend"
+# Storage Module (Static Hosting)
+module "storage" {
+  source = "../../modules/storage"
   
   name_prefix = local.name_prefix
   price_class = var.frontend_price_class
@@ -69,9 +69,9 @@ module "frontend" {
   # ssl_certificate_arn = var.frontend_ssl_certificate_arn
 }
 
-# Backend Module (API Gateway + Load Balancer)
-module "backend" {
-  source = "../../modules/backend"
+# API Gateway Module (Load Balancer + API Gateway)
+module "api_gateway" {
+  source = "../../modules/api-gateway"
   
   name_prefix           = local.name_prefix
   vpc_id               = module.networking.vpc_id
@@ -89,9 +89,9 @@ module "backend" {
   depends_on = [module.networking]
 }
 
-# Kong API Gateway Module
-module "kong" {
-  source = "../../modules/kong"
+# Services Module (Kong API Gateway)
+module "services" {
+  source = "../../modules/services"
   
   name_prefix = local.name_prefix
   kong_database_password = var.kong_database_password
@@ -103,9 +103,9 @@ module "kong" {
   depends_on = [module.compute]
 }
 
-# IAM Module
-module "iam" {
-  source = "../../modules/iam"
+# Security Module (IAM)
+module "security" {
+  source = "../../modules/security"
   
   project_name = var.project_name
   environment  = var.environment

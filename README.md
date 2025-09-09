@@ -122,24 +122,21 @@ graph LR
 sequenceDiagram
     participant U as "👥 User"
     participant CF as "🌐 CloudFront"
-    participant ALB as "🔄 ALB"
-    participant K as "🦍 Kong"
+    participant K as "🦍 Kong (LoadBalancer)"
     participant S as "📦 Service"
     participant DB as "🐘 Database"
     
     U->>CF: Request Frontend
     CF->>U: Static Files (HTML/CSS/JS)
     
-    U->>ALB: API Request
-    ALB->>K: Forward to Kong
+    U->>K: API Request
     K->>K: Rate Limiting Check
     K->>K: CORS Headers
     K->>S: Route to Service
     S->>DB: Database Query
     DB->>S: Return Data
     S->>K: API Response
-    K->>ALB: Forward Response
-    ALB->>U: Final Response
+    K->>U: Final Response
 ```
 
 ## 📁 Project Structure

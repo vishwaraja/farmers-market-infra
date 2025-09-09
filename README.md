@@ -83,8 +83,7 @@ graph LR
     end
     
     subgraph Gateway["API Gateway Layer"]
-        ALB["🔄 AWS ALB"]
-        KongProxy["🦍 Kong Proxy"]
+        KongProxy["🦍 Kong Proxy (LoadBalancer)"]
         KongAdmin["🦍 Kong Admin API"]
         KongDB[("🐘 PostgreSQL")]
     end
@@ -103,8 +102,7 @@ graph LR
     
     React --> S3Static
     S3Static --> CDN
-    CDN --> ALB
-    ALB --> KongProxy
+    CDN --> KongProxy
     KongProxy --> UserAPI
     KongProxy --> ProductAPI
     KongProxy --> OrderAPI

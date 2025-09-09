@@ -4,12 +4,18 @@ This document explains the simplified branch strategy for your Terraform infrast
 
 ## 🎯 Current Setup
 
-### **Two-Environment Strategy:**
+### **Two-Environment Strategy with Enforced Flow:**
 ```
 main (production) ← Manual approval required
 ├── dev ← Auto-deploy
-└── feature/* ← PR validation only
+└── feature/* ← PR to dev only (NOT main)
 ```
+
+### **Enforced Workflow Rules:**
+- ✅ **PRs to `dev`** - Allowed from any branch
+- ❌ **PRs to `main`** - Blocked (enforced by workflow)
+- ✅ **Direct push to `dev`** - Allowed for quick fixes
+- ✅ **Direct push to `main`** - Allowed for merging dev to prod
 
 ## 🚀 Development Workflow
 
@@ -48,11 +54,11 @@ git push origin main
 
 ## 📋 Branch Behavior
 
-| Branch | CI/CD Pipeline | Deployment | Approval |
-|--------|----------------|------------|----------|
-| **dev** | ✅ Full pipeline | ✅ Auto-deploy | ❌ None |
-| **main** | ✅ Full pipeline | ✅ Deploy to prod | ✅ Manual approval |
-| **feature/*** | ✅ Validation only | ❌ No deploy | ❌ None |
+| Branch | CI/CD Pipeline | Deployment | Approval | PRs Allowed |
+|--------|----------------|------------|----------|-------------|
+| **dev** | ✅ Full pipeline | ✅ Auto-deploy | ❌ None | ✅ From any branch |
+| **main** | ✅ Full pipeline | ✅ Deploy to prod | ✅ Manual approval | ❌ Blocked |
+| **feature/*** | ✅ Validation only | ❌ No deploy | ❌ None | ✅ To dev only |
 
 ## 🎯 Benefits of Dev/Prod Only
 

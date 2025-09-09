@@ -21,9 +21,9 @@ on:
       - 'shared/**'
 
 env:
-  TF_VERSION: '1.6.0'
-  AWS_REGION: 'us-east-1'
-  ENVIRONMENT: 'dev'
+  TF_VERSION: ${{ vars.TF_VERSION || '1.6.0' }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  ENVIRONMENT: ${{ vars.ENVIRONMENT || 'dev' }}
 
 jobs:
   # =============================================================================
@@ -42,12 +42,14 @@ jobs:
       with:
         terraform_version: ${{ env.TF_VERSION }}
         
-    - name: Configure AWS Credentials
+    - name: 🔑 Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        role-session-name: ${{ github.workflow }}-${{ github.run_id }}
         
     - name: 🔍 Terraform Format Check
       run: terraform fmt -check -recursive
@@ -60,78 +62,16 @@ jobs:
       run: terraform validate
       working-directory: environments/dev
       
-    - name: 🔍 Check Bypass Flags
-      id: bypass
-      run: |
-        # Check commit message for bypass flags
-        COMMIT_MSG="${{ github.event.head_commit.message }}"
-        echo "Commit message: $COMMIT_MSG"
-        
-        # Check for bypass flags in commit message
-        if echo "$COMMIT_MSG" | grep -qi "\[skip-tflint\]"; then
-          echo "skip_tflint=true" >> $GITHUB_OUTPUT
-          echo "🔄 TFLint bypassed via commit message"
-        else
-          echo "skip_tflint=false" >> $GITHUB_OUTPUT
-        fi
-        
-        if echo "$COMMIT_MSG" | grep -qi "\[skip-checkov\]"; then
-          echo "skip_checkov=true" >> $GITHUB_OUTPUT
-          echo "🔄 Checkov bypassed via commit message"
-        else
-          echo "skip_checkov=false" >> $GITHUB_OUTPUT
-        fi
-        
-        if echo "$COMMIT_MSG" | grep -qi "\[skip-validation\]"; then
-          echo "skip_tflint=true" >> $GITHUB_OUTPUT
-          echo "skip_checkov=true" >> $GITHUB_OUTPUT
-          echo "🔄 All validation bypassed via commit message"
-        fi
-        
-        # Check workflow dispatch inputs
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          if [ "${{ inputs.skip_tflint }}" = "true" ]; then
-            echo "skip_tflint=true" >> $GITHUB_OUTPUT
-            echo "🔄 TFLint bypassed via workflow dispatch"
-          fi
-          
-          if [ "${{ inputs.skip_checkov }}" = "true" ]; then
-            echo "skip_checkov=true" >> $GITHUB_OUTPUT
-            echo "🔄 Checkov bypassed via workflow dispatch"
-          fi
-          
-          if [ "${{ inputs.skip_all_validation }}" = "true" ]; then
-            echo "skip_tflint=true" >> $GITHUB_OUTPUT
-            echo "skip_checkov=true" >> $GITHUB_OUTPUT
-            echo "🔄 All validation bypassed via workflow dispatch"
-          fi
-        fi
-        
-        # Display bypass status
-        echo "Bypass Status:"
-        echo "  TFLint: ${{ steps.bypass.outputs.skip_tflint }}"
-        echo "  Checkov: ${{ steps.bypass.outputs.skip_checkov }}"
-        
     - name: 🔧 TFLint Setup
-      if: steps.bypass.outputs.skip_tflint != 'true'
       uses: terraform-linters/setup-tflint@v3
       with:
         tflint_version: latest
         
     - name: 🔍 Run TFLint
-      if: steps.bypass.outputs.skip_tflint != 'true'
       run: tflint
       working-directory: environments/dev
       
-    - name: ⏭️ Skip TFLint (Bypassed)
-      if: steps.bypass.outputs.skip_tflint == 'true'
-      run: |
-        echo "🔄 TFLint validation skipped"
-        echo "⚠️  WARNING: TFLint validation was bypassed"
-        echo "   This means security and best practice checks were not performed"
-        
     - name: 🔒 Checkov Security Scan
-      if: steps.bypass.outputs.skip_checkov != 'true'
       uses: bridgecrewio/checkov-action@master
       with:
         directory: environments/dev
@@ -140,17 +80,9 @@ jobs:
         output_file_path: checkov.sarif
         
     - name: 📤 Upload Checkov Results
-      if: steps.bypass.outputs.skip_checkov != 'true'
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: checkov.sarif
-        
-    - name: ⏭️ Skip Checkov (Bypassed)
-      if: steps.bypass.outputs.skip_checkov == 'true'
-      run: |
-        echo "🔄 Checkov security scan skipped"
-        echo "⚠️  WARNING: Checkov security scan was bypassed"
-        echo "   This means security vulnerability checks were not performed"
 
   # =============================================================================
   # PLAN JOB
@@ -289,7 +221,7 @@ jobs:
           **Kong URL:** ${{ steps.outputs.outputs.kong_proxy_url }}
           
           All infrastructure tests passed! ✅
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
         
     - name: 📢 Notify Failure
       uses: 8398a7/action-slack@v3
@@ -305,7 +237,7 @@ jobs:
           **Commit:** ${{ github.sha }}
           
           Check the logs for details.
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # =============================================================================
   # PR COMMENT JOB

@@ -76,9 +76,9 @@ terraform apply
 
 ## 💰 Costs
 
-### Current Infrastructure Costs (Monthly)
+### Current Infrastructure Costs (Per Month)
 
-| Environment | EKS | Kong/ALB | NAT Gateway | CloudFront | S3 | **Total** |
+| Environment | EKS | Kong/ALB | NAT Gateway | CloudFront | S3 | **Total/Month** |
 |-------------|-----|----------|-------------|------------|----|-----------| 
 | **Dev** | $15.20 | $16.05 | $32.40 | $1.20 | $0.38 | **$53.23** |
 | **Production** | $30.40 | $16.05 | $32.40 | $1.20 | $0.38 | **$80.43** |

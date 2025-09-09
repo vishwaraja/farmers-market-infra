@@ -4,7 +4,7 @@
 # This workflow runs comprehensive tests on Terraform code
 # Triggers: Push to any branch, Pull requests
 
-name: Terraform Testing
+name: 🧪 Terraform Testing
 
 on:
   push:

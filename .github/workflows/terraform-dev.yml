@@ -4,7 +4,7 @@
 # This workflow automatically deploys changes to the dev environment
 # Triggers: Push to dev branch, PR to dev branch
 
-name: Terraform Dev Environment
+name: 🚀 Terraform Dev Environment
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
   # VALIDATION JOB
   # =============================================================================
   validate:
-    name: Validate Terraform
+    name: ✅ Terraform Validation & Security
     runs-on: ubuntu-latest
     
     steps:
@@ -49,27 +49,27 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
         
-    - name: Terraform Format Check
+    - name: 🔍 Terraform Format Check
       run: terraform fmt -check -recursive
       
-    - name: Terraform Init
+    - name: 🔧 Terraform Init
       run: terraform init
       working-directory: environments/dev
       
-    - name: Terraform Validate
+    - name: ✅ Terraform Validate
       run: terraform validate
       working-directory: environments/dev
       
-    - name: TFLint Setup
+    - name: 🔧 TFLint Setup
       uses: terraform-linters/setup-tflint@v3
       with:
         tflint_version: latest
         
-    - name: Run TFLint
+    - name: 🔍 Run TFLint
       run: tflint
       working-directory: environments/dev
       
-    - name: Checkov Security Scan
+    - name: 🔒 Checkov Security Scan
       uses: bridgecrewio/checkov-action@master
       with:
         directory: environments/dev
@@ -77,7 +77,7 @@ jobs:
         output_format: sarif
         output_file_path: checkov.sarif
         
-    - name: Upload Checkov Results
+    - name: 📤 Upload Checkov Results
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: checkov.sarif
@@ -86,35 +86,35 @@ jobs:
   # PLAN JOB
   # =============================================================================
   plan:
-    name: Terraform Plan
+    name: 📋 Terraform Plan
     runs-on: ubuntu-latest
     needs: validate
     
     steps:
-    - name: Checkout Code
+    - name: 📥 Checkout Code
       uses: actions/checkout@v4
       
-    - name: Setup Terraform
+    - name: 🔧 Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ env.TF_VERSION }}
         
-    - name: Configure AWS Credentials
+    - name: 🔑 Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
         
-    - name: Terraform Init
+    - name: 🔧 Terraform Init
       run: terraform init
       working-directory: environments/dev
       
-    - name: Terraform Plan
+    - name: 📋 Terraform Plan
       run: terraform plan -out=tfplan
       working-directory: environments/dev
       
-    - name: Upload Plan Artifact
+    - name: 📤 Upload Plan Artifact
       uses: actions/upload-artifact@v4
       with:
         name: terraform-plan-dev
@@ -125,43 +125,43 @@ jobs:
   # APPLY JOB (Auto-deploy to dev)
   # =============================================================================
   apply:
-    name: Terraform Apply
+    name: 🚀 Terraform Apply
     runs-on: ubuntu-latest
     needs: [validate, plan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     environment: development
     
     steps:
-    - name: Checkout Code
+    - name: 📥 Checkout Code
       uses: actions/checkout@v4
       
-    - name: Setup Terraform
+    - name: 🔧 Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ env.TF_VERSION }}
         
-    - name: Configure AWS Credentials
+    - name: 🔑 Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
         
-    - name: Download Plan Artifact
+    - name: 📥 Download Plan Artifact
       uses: actions/download-artifact@v4
       with:
         name: terraform-plan-dev
         path: environments/dev
         
-    - name: Terraform Init
+    - name: 🔧 Terraform Init
       run: terraform init
       working-directory: environments/dev
       
-    - name: Terraform Apply
+    - name: 🚀 Terraform Apply
       run: terraform apply tfplan
       working-directory: environments/dev
       
-    - name: Get Outputs
+    - name: 📊 Get Outputs
       id: outputs
       run: |
         echo "kong_proxy_url=$(terraform output -raw kong_proxy_url)" >> $GITHUB_OUTPUT
@@ -169,7 +169,7 @@ jobs:
         echo "storage_bucket_name=$(terraform output -raw storage_bucket_name)" >> $GITHUB_OUTPUT
       working-directory: environments/dev
       
-    - name: Test Infrastructure
+    - name: 🧪 Test Infrastructure
       run: |
         echo "🧪 Testing deployed infrastructure..."
         
@@ -204,7 +204,7 @@ jobs:
         echo "🎉 All infrastructure tests passed!"
       working-directory: environments/dev
       
-    - name: Notify Success
+    - name: 📢 Notify Success
       uses: 8398a7/action-slack@v3
       if: success()
       with:
@@ -221,7 +221,7 @@ jobs:
           All infrastructure tests passed! ✅
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         
-    - name: Notify Failure
+    - name: 📢 Notify Failure
       uses: 8398a7/action-slack@v3
       if: failure()
       with:
@@ -241,22 +241,22 @@ jobs:
   # PR COMMENT JOB
   # =============================================================================
   pr-comment:
-    name: Comment PR
+    name: 💬 Comment PR
     runs-on: ubuntu-latest
     needs: [validate, plan]
     if: github.event_name == 'pull_request'
     
     steps:
-    - name: Checkout Code
+    - name: 📥 Checkout Code
       uses: actions/checkout@v4
       
-    - name: Download Plan Artifact
+    - name: 📥 Download Plan Artifact
       uses: actions/download-artifact@v4
       with:
         name: terraform-plan-dev
         path: environments/dev
         
-    - name: Generate Plan Output
+    - name: 📊 Generate Plan Output
       id: plan-output
       run: |
         cd environments/dev
@@ -267,7 +267,7 @@ jobs:
         echo "EOF" >> $GITHUB_OUTPUT
       shell: bash
       
-    - name: Comment PR
+    - name: 💬 Comment PR
       uses: actions/github-script@v7
       with:
         script: |

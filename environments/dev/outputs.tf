@@ -123,6 +123,27 @@ output "kong_connection_commands" {
   value       = module.kong.kong_connection_commands
 }
 
+# IAM Information
+output "iam_groups" {
+  description = "IAM groups created"
+  value       = module.iam.iam_groups_summary
+}
+
+output "iam_policies" {
+  description = "IAM policies created"
+  value       = module.iam.iam_policies_summary
+}
+
+output "service_roles" {
+  description = "Service roles for AWS services"
+  value = {
+    eks_cluster_role = module.iam.eks_cluster_role_name
+    eks_node_role    = module.iam.eks_node_role_name
+    alb_controller_role = module.iam.alb_controller_role_name
+    cross_account_role = module.iam.cross_account_role_name
+  }
+}
+
 # Complete Application URLs
 output "application_urls" {
   description = "Complete application URLs"

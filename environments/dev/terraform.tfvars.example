@@ -80,6 +80,38 @@ kong_services = [
 # hosted_zone_id = "Z1234567890ABC"
 # backend_ssl_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
 
+# IAM Configuration
+enable_cross_account_access = true
+cross_account_external_id   = "farmers-market-cross-account-2024"
+
+# IAM User Assignments (add your team members here)
+devops_users = [
+  # "john.doe",
+  # "jane.smith"
+]
+
+admin_users = [
+  # "cto@company.com"
+]
+
+developer_users = [
+  # "dev1@company.com",
+  # "dev2@company.com"
+]
+
+qa_users = [
+  # "qa1@company.com",
+  # "qa2@company.com"
+]
+
+manager_users = [
+  # "manager1@company.com"
+]
+
+readonly_users = [
+  # "intern@company.com"
+]
+
 # Additional Tags
 additional_tags = {
   Team        = "platform"

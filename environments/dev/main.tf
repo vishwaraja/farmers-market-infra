@@ -103,6 +103,36 @@ module "kong" {
   depends_on = [module.compute]
 }
 
+# IAM Module
+module "iam" {
+  source = "../../modules/iam"
+  
+  project_name = var.project_name
+  environment  = var.environment
+  aws_region   = data.aws_region.current.name
+  
+  # Cross-account configuration
+  enable_cross_account_access = var.enable_cross_account_access
+  account_id                  = data.aws_caller_identity.current.account_id
+  cross_account_external_id   = var.cross_account_external_id
+  
+  # EKS OIDC configuration
+  eks_oidc_provider_arn = module.compute.eks_oidc_provider_arn
+  kong_namespace        = "kong"
+  
+  # User assignments
+  devops_users     = var.devops_users
+  admin_users      = var.admin_users
+  developer_users  = var.developer_users
+  qa_users         = var.qa_users
+  manager_users    = var.manager_users
+  readonly_users   = var.readonly_users
+  
+  tags = local.common_tags
+  
+  depends_on = [module.compute]
+}
+
 # Data sources for outputs
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}

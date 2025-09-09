@@ -227,6 +227,56 @@ variable "kong_replicas" {
   default     = 2
 }
 
+# IAM Configuration
+variable "enable_cross_account_access" {
+  description = "Enable cross-account access for future multi-account setup"
+  type        = bool
+  default     = true
+}
+
+variable "cross_account_external_id" {
+  description = "External ID for cross-account role assumption"
+  type        = string
+  default     = "farmers-market-cross-account-2024"
+}
+
+# IAM User Assignments
+variable "devops_users" {
+  description = "List of IAM usernames to add to the devops group"
+  type        = list(string)
+  default     = []
+}
+
+variable "admin_users" {
+  description = "List of IAM usernames to add to the admin group"
+  type        = list(string)
+  default     = []
+}
+
+variable "developer_users" {
+  description = "List of IAM usernames to add to the developers group"
+  type        = list(string)
+  default     = []
+}
+
+variable "qa_users" {
+  description = "List of IAM usernames to add to the qa-engineers group"
+  type        = list(string)
+  default     = []
+}
+
+variable "manager_users" {
+  description = "List of IAM usernames to add to the managers group"
+  type        = list(string)
+  default     = []
+}
+
+variable "readonly_users" {
+  description = "List of IAM usernames to add to the readonly group"
+  type        = list(string)
+  default     = []
+}
+
 # Tags
 variable "additional_tags" {
   description = "Additional tags to apply to all resources"

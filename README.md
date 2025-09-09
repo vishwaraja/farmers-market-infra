@@ -9,6 +9,8 @@ A production-ready AWS infrastructure for The Farmers Market project using Terra
 - [Quick Start](#-quick-start)
 - [Costs](#-costs)
 - [Deployment](#-deployment)
+- [Project Structure](#-project-structure)
+- [Troubleshooting](#-troubleshooting)
 
 ## 🎯 Overview
 
@@ -53,24 +55,17 @@ graph TB
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- AWS CLI configured
-- Terraform >= 1.6.0
-- kubectl
+### First Time Setup
+**See [Initial Setup Guide](docs/INITIAL_SETUP.md) for complete one-time setup instructions.**
 
-### Deploy
+### Daily Usage
 ```bash
-# 1. Clone repository
-git clone https://github.com/vishwaraja/farmers-market-infra.git
-cd farmers-market-infra
-
-# 2. Bootstrap state management
-./scripts/bootstrap-state.sh dev
-
-# 3. Deploy infrastructure
+# Deploy to dev
 cd environments/dev
-terraform init
-terraform plan
+terraform apply
+
+# Deploy to production  
+cd environments/production
 terraform apply
 ```
 

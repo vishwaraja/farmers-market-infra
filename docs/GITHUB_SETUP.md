@@ -137,13 +137,6 @@ AWS_REGION: us-east-1
 ENVIRONMENT: dev
 ```
 
-**Staging:**
-```
-TF_VERSION: 1.6.0
-AWS_REGION: us-west-2
-ENVIRONMENT: staging
-```
-
 **Production:**
 ```
 TF_VERSION: 1.6.0

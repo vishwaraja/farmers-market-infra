@@ -1,5 +1,5 @@
 # Kong Configuration Template
-# This template defines the initial Kong services and routes
+# This template loads services from individual YAML files in kong-services/
 
 _format_version: "3.0"
 
@@ -8,51 +8,46 @@ services:
   - name: ${service.name}
     url: ${service.url}
     routes:
-      - name: ${service.name}-route
+%{ for route in service.routes ~}
+      - name: ${route.name}
         paths:
-          - ${service.path}
+%{ for path in route.paths ~}
+          - ${path}
+%{ endfor ~}
         methods:
-          - GET
-          - POST
-          - PUT
-          - DELETE
-          - PATCH
-        strip_path: ${service.strip_path}
-        preserve_host: ${service.preserve_host}
+%{ for method in route.methods ~}
+          - ${method}
+%{ endfor ~}
+        strip_path: ${route.strip_path}
+        preserve_host: ${route.preserve_host}
+%{ endfor ~}
     plugins:
-      - name: cors
+%{ for plugin in service.plugins ~}
+      - name: ${plugin.name}
         config:
-          origins:
-            - "*"
-          methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - PATCH
-            - OPTIONS
-          headers:
-            - Accept
-            - Accept-Version
-            - Content-Length
-            - Content-MD5
-            - Content-Type
-            - Date
-            - X-Auth-Token
-          exposed_headers:
-            - X-Auth-Token
-          credentials: true
-          max_age: 3600
-      - name: rate-limiting
-        config:
-          minute: ${service.rate_limit_minute}
-          hour: ${service.rate_limit_hour}
-          policy: local
-      - name: request-transformer
-        config:
-          add:
-            headers:
-              - "X-Forwarded-By:Kong"
+%{ for key, value in plugin.config ~}
+%{ if can(tolist(value)) ~}
+          ${key}:
+%{ for item in value ~}
+            - ${item}
+%{ endfor ~}
+%{ else if can(tomap(value)) ~}
+          ${key}:
+%{ for subkey, subvalue in value ~}
+%{ if can(tolist(subvalue)) ~}
+            ${subkey}:
+%{ for item in subvalue ~}
+              - ${item}
+%{ endfor ~}
+%{ else ~}
+            ${subkey}: ${subvalue}
+%{ endif ~}
+%{ endfor ~}
+%{ else ~}
+          ${key}: ${value}
+%{ endif ~}
+%{ endfor ~}
+%{ endfor ~}
 %{ endfor ~}
 
 # Global plugins

@@ -1,0 +1,78 @@
+# =============================================================================
+# ORDER SERVICE KONG CONFIGURATION
+# =============================================================================
+# This file defines Kong routes, plugins, and configuration for the order service
+# Drop this file in kong-services/ directory to automatically configure Kong
+
+name: order-service
+url: http://order-service.farmers-market.svc.cluster.local:80
+
+routes:
+  # Main V1 API route
+  - name: order-service-v1-route
+    paths:
+      - /v1/orders
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    strip_path: false
+    preserve_host: false
+
+plugins:
+  # CORS Plugin
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - X-Auth-Token
+        - Authorization
+      exposed_headers:
+        - X-Auth-Token
+      credentials: true
+      max_age: 3600
+
+  # Rate Limiting Plugin (lower limits for order operations)
+  - name: rate-limiting
+    config:
+      minute: 50
+      hour: 500
+      policy: local
+
+  # Request Transformer Plugin
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Forwarded-By:Kong"
+          - "X-Service:order-service"
+
+  # Optional: JWT Authentication (orders typically need auth)
+  # - name: jwt
+  #   config:
+  #     secret_is_base64: false
+  #     key_claim_name: iss
+  #     algorithm: HS256
+  #     anonymous: null
+
+  # Optional: Request Size Limiting for order payloads
+  # - name: request-size-limiting
+  #   config:
+  #     allowed_payload_size: 5
+  #     size_unit: megabytes

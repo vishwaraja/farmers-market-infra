@@ -492,6 +492,14 @@ resource "kubernetes_ingress_v1" "kong_ingress" {
   }
 }
 
+# Load all Kong service configurations from individual YAML files
+locals {
+  kong_service_files = fileset("${path.module}/kong-services", "*.yml")
+  kong_services = [
+    for file in local.kong_service_files : yamldecode(file("${path.module}/kong-services/${file}"))
+  ]
+}
+
 # Kong Configuration ConfigMap
 resource "kubernetes_config_map" "kong_config" {
   metadata {
@@ -501,7 +509,7 @@ resource "kubernetes_config_map" "kong_config" {
 
   data = {
     "kong.yml" = templatefile("${path.module}/templates/kong.yml.tpl", {
-      services = var.kong_services
+      services = local.kong_services
     })
   }
 }

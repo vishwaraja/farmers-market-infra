@@ -1,0 +1,91 @@
+# =============================================================================
+# USER SERVICE KONG CONFIGURATION
+# =============================================================================
+# This file defines Kong routes, plugins, and configuration for the user service
+# Drop this file in kong-services/ directory to automatically configure Kong
+
+name: user-service
+url: http://user-service.farmers-market.svc.cluster.local:80
+
+routes:
+  # Main V1 API route
+  - name: user-service-v1-route
+    paths:
+      - /v1/users
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    strip_path: false
+    preserve_host: false
+    
+  # Legacy API route (if needed)
+  - name: user-service-api-route
+    paths:
+      - /api/users
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+    strip_path: false
+    preserve_host: false
+
+plugins:
+  # CORS Plugin
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - X-Auth-Token
+        - Authorization
+      exposed_headers:
+        - X-Auth-Token
+      credentials: true
+      max_age: 3600
+
+  # Rate Limiting Plugin
+  - name: rate-limiting
+    config:
+      minute: 100
+      hour: 1000
+      policy: local
+
+  # Request Transformer Plugin
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Forwarded-By:Kong"
+          - "X-Service:user-service"
+
+  # Optional: JWT Authentication Plugin (uncomment if needed)
+  # - name: jwt
+  #   config:
+  #     secret_is_base64: false
+  #     key_claim_name: iss
+  #     algorithm: HS256
+  #     anonymous: null
+
+  # Optional: Request Size Limiting (uncomment if needed)
+  # - name: request-size-limiting
+  #   config:
+  #     allowed_payload_size: 10
+  #     size_unit: megabytes
